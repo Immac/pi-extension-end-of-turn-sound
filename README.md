@@ -10,9 +10,9 @@ A Pi tool extension that plays a completion sound when a turn finishes and contr
 
 - 🔔 Plays a sound on `agent_end` after all tool work is complete
 - ⛔ Skips the sound when the run was aborted
-- 💥 Plays `oh_nyo.mp3` when the run ends in error
+- 💥 Plays `oh_nyo.mp3` when the run ends in error, or a custom error sound if configured
 - 🎧 Uses the first available local audio player (`paplay`, `aplay`, `ffplay`, `play`, `afplay`)
-- ⚙️ Supports overrides via environment variable, Pi config files, and volume controls
+- ⚙️ Supports overrides via environment variables, Pi config files, and volume controls
 - 📦 Ships with bundled sounds: `job_is_done.mp3` and `oh_nyo.mp3`
 - 🧱 Small, single-file TypeScript extension
 
@@ -36,14 +36,21 @@ No extra setup is required. When a Pi turn ends successfully, the bundled `job_i
 
 ## Configuration
 
-The extension resolves the success sound file in this order:
+The extension resolves sounds in this order:
+
+### Success sound
 
 1. `END_OF_TURN_SOUND`
 2. `.pi/end-of-turn-sound.json` in the current project
 3. `~/.pi/end-of-turn-sound.json`
 4. bundled `job_is_done.mp3`
 
-Errors always use the bundled `oh_nyo.mp3`.
+### Error sound
+
+1. `ERROR_END_OF_TURN_SOUND`
+2. `.pi/end-of-turn-sound.json` in the current project
+3. `~/.pi/end-of-turn-sound.json`
+4. bundled `oh_nyo.mp3`
 
 Volume settings are optional and use two levels:
 
@@ -57,6 +64,7 @@ Example project config (`.pi/end-of-turn-sound.json`):
 ```json
 {
   "soundFile": "/path/to/custom-sound.mp3",
+  "errorSoundFile": "/path/to/custom-error.mp3",
   "masterVolume": 0.8,
   "successVolume": 1.0,
   "errorVolume": 0.6
@@ -68,6 +76,7 @@ Example global config (`~/.pi/end-of-turn-sound.json`):
 ```json
 {
   "soundFile": "/home/me/sounds/custom-done.wav",
+  "errorSoundFile": "/home/me/sounds/custom-error.wav",
   "masterVolume": 0.75,
   "successVolume": 1,
   "errorVolume": 0.5
@@ -78,6 +87,7 @@ Example environment override:
 
 ```bash
 export END_OF_TURN_SOUND="/path/to/custom-sound.mp3"
+export ERROR_END_OF_TURN_SOUND="/path/to/custom-error.mp3"
 ```
 
 ## Usage Examples
@@ -90,7 +100,8 @@ Just install the extension and keep the default behavior.
 
 ```json
 {
-  "soundFile": "/home/me/sounds/done.wav"
+  "soundFile": "/home/me/sounds/done.wav",
+  "errorSoundFile": "/home/me/sounds/error.wav"
 }
 ```
 
@@ -100,7 +111,8 @@ Save it as `.pi/end-of-turn-sound.json` in your project root.
 
 ```json
 {
-  "soundFile": "/home/me/sounds/done.mp3"
+  "soundFile": "/home/me/sounds/done.mp3",
+  "errorSoundFile": "/home/me/sounds/error.mp3"
 }
 ```
 

@@ -13,6 +13,7 @@ type SoundKind = "success" | "error";
 
 type SoundConfig = {
   soundFile: string;
+  errorSoundFile: string;
   masterVolume: number;
   successVolume: number;
   errorVolume: number;
@@ -41,6 +42,10 @@ function readConfigFile(configPath: string): Partial<SoundConfig> {
       result.soundFile = config.soundFile;
     }
 
+    if (typeof config.errorSoundFile === "string") {
+      result.errorSoundFile = config.errorSoundFile;
+    }
+
     if (typeof config.masterVolume === "number") {
       result.masterVolume = clampVolume(config.masterVolume, 1);
     }
@@ -62,6 +67,7 @@ function readConfigFile(configPath: string): Partial<SoundConfig> {
 function getConfiguredSoundConfig(): SoundConfig {
   const defaults: SoundConfig = {
     soundFile: SUCCESS_SOUND_FALLBACK,
+    errorSoundFile: ERROR_SOUND_FILE,
     masterVolume: 1,
     successVolume: 1,
     errorVolume: 1,
@@ -71,9 +77,11 @@ function getConfiguredSoundConfig(): SoundConfig {
   const homeConfig = readConfigFile(path.join(os.homedir(), ".pi", "end-of-turn-sound.json"));
 
   const envSoundFile = process.env.END_OF_TURN_SOUND;
+  const envErrorSoundFile = process.env.ERROR_END_OF_TURN_SOUND;
 
   return {
     soundFile: envSoundFile ?? projectConfig.soundFile ?? homeConfig.soundFile ?? defaults.soundFile,
+    errorSoundFile: envErrorSoundFile ?? projectConfig.errorSoundFile ?? homeConfig.errorSoundFile ?? defaults.errorSoundFile,
     masterVolume: projectConfig.masterVolume ?? homeConfig.masterVolume ?? defaults.masterVolume,
     successVolume: projectConfig.successVolume ?? homeConfig.successVolume ?? defaults.successVolume,
     errorVolume: projectConfig.errorVolume ?? homeConfig.errorVolume ?? defaults.errorVolume,
@@ -198,7 +206,7 @@ export default function (pi: ExtensionAPI) {
     const outcome = getOutcome(event.messages);
     if (outcome === "aborted") return;
 
-    const soundFile = outcome === "error" ? ERROR_SOUND_FILE : CONFIG.soundFile;
+    const soundFile = outcome === "error" ? CONFIG.errorSoundFile : CONFIG.soundFile;
     const volume = getEffectiveVolume(outcome === "error" ? "error" : "success");
 
     playSound(soundFile, volume);
