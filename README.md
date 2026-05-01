@@ -12,7 +12,7 @@ A Pi tool extension that plays a completion sound when a turn finishes and contr
 - ⛔ Skips the sound when the run was aborted
 - 💥 Plays `oh_nyo.mp3` when the run ends in error
 - 🎧 Uses the first available local audio player (`paplay`, `aplay`, `ffplay`, `play`, `afplay`)
-- ⚙️ Supports overrides via environment variable and Pi config files
+- ⚙️ Supports overrides via environment variable, Pi config files, and volume controls
 - 📦 Ships with bundled sounds: `job_is_done.mp3` and `oh_nyo.mp3`
 - 🧱 Small, single-file TypeScript extension
 
@@ -45,11 +45,21 @@ The extension resolves the success sound file in this order:
 
 Errors always use the bundled `oh_nyo.mp3`.
 
+Volume settings are optional and use two levels:
+
+- `masterVolume`: global multiplier for all sounds
+- `successVolume` / `errorVolume`: per-sound multipliers
+
+Effective volume = `masterVolume × perSoundVolume`.
+
 Example project config (`.pi/end-of-turn-sound.json`):
 
 ```json
 {
-  "soundFile": "/path/to/custom-sound.mp3"
+  "soundFile": "/path/to/custom-sound.mp3",
+  "masterVolume": 0.8,
+  "successVolume": 1.0,
+  "errorVolume": 0.6
 }
 ```
 
@@ -57,7 +67,10 @@ Example global config (`~/.pi/end-of-turn-sound.json`):
 
 ```json
 {
-  "soundFile": "/home/me/sounds/custom-done.wav"
+  "soundFile": "/home/me/sounds/custom-done.wav",
+  "masterVolume": 0.75,
+  "successVolume": 1,
+  "errorVolume": 0.5
 }
 ```
 
