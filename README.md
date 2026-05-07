@@ -1,20 +1,20 @@
 # end-of-turn-sound
 
-A Pi tool extension that plays a completion sound when a turn finishes and control returns to the human.
+A Pi tool extension that plays a sound when a turn finishes and control returns to the human.
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-6.0.3-blue?style=flat-square&logo=typescript)
-![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)
+![MIT License](https://img.shields.io/badge/license-MIT-green?style=flat-square)
 ![Pi Extension](https://img.shields.io/badge/pi--extension-orange?style=flat-square)
 
 ## Features
 
-- 🔔 Plays a sound on `agent_end` after all tool work is complete
-- ⛔ Skips the sound when the run was aborted
-- 💥 Plays `oh_nyo.mp3` when the run ends in error, or a custom error sound if configured
-- 🎧 Uses the first available local audio player (`paplay`, `aplay`, `ffplay`, `play`, `afplay`)
-- ⚙️ Supports overrides via environment variables, Pi config files, and volume controls
+- 🔔 Plays a completion sound on `agent_end` for human-started runs
+- ⛔ Skips the sound for aborted runs
+- 💥 Plays a separate error sound when the run ends in error
+- 🎧 Uses the first available local audio player (`paplay`, `ffplay`, `play`, `afplay`, `aplay`)
+- ⚙️ Supports environment variables, project config, home config, and volume overrides
 - 📦 Ships with bundled sounds: `job_is_done.mp3` and `oh_nyo.mp3`
-- 🧱 Small, single-file TypeScript extension
+- 🧩 Small single-file TypeScript extension
 
 ## Tools / Commands
 
@@ -32,7 +32,9 @@ pi install /path/to/end-of-turn-sound
 
 ### First use
 
-No extra setup is required. When a Pi turn ends successfully, the bundled `job_is_done.mp3` is played automatically if no custom sound is configured. Aborted runs do not play the sound. Errors play the bundled `oh_nyo.mp3`.
+No extra setup is required. After installation, the extension plays the bundled `job_is_done.mp3` when a run finishes successfully.
+
+If the run ends in error, it plays `oh_nyo.mp3`. Aborted runs do not play any sound.
 
 ## Configuration
 
@@ -52,7 +54,7 @@ The extension resolves sounds in this order:
 3. `~/.pi/end-of-turn-sound.json`
 4. bundled `oh_nyo.mp3`
 
-Volume settings are optional and use two levels:
+Volume is optional and uses two levels:
 
 - `masterVolume`: global multiplier for all sounds
 - `successVolume` / `errorVolume`: per-sound multipliers
@@ -71,18 +73,6 @@ Example project config (`.pi/end-of-turn-sound.json`):
 }
 ```
 
-Example global config (`~/.pi/end-of-turn-sound.json`):
-
-```json
-{
-  "soundFile": "/home/me/sounds/custom-done.wav",
-  "errorSoundFile": "/home/me/sounds/custom-error.wav",
-  "masterVolume": 0.75,
-  "successVolume": 1,
-  "errorVolume": 0.5
-}
-```
-
 Example environment override:
 
 ```bash
@@ -90,11 +80,18 @@ export END_OF_TURN_SOUND="/path/to/custom-sound.mp3"
 export ERROR_END_OF_TURN_SOUND="/path/to/custom-error.mp3"
 ```
 
+### Audio player notes
+
+- `paplay`, `ffplay`, `play`, and `afplay` can play the bundled MP3 files directly.
+- Sound only plays when the run was started by a human (`interactive` or `rpc` input)
+- `aplay` only works with WAV audio, so the extension uses `ffmpeg` to transcode bundled MP3s or volume-adjusted playback into a temporary WAV file when needed.
+- If you rely on `aplay`, install `ffmpeg` too.
+
 ## Usage Examples
 
-### Use the bundled sound
+### Use the bundled sounds
 
-Just install the extension and keep the default behavior.
+Install the extension and do nothing else.
 
 ### Use a custom project sound
 
@@ -118,6 +115,18 @@ Save it as `.pi/end-of-turn-sound.json` in your project root.
 
 Save it as `~/.pi/end-of-turn-sound.json`.
 
+### Tune volume
+
+```json
+{
+  "masterVolume": 0.75,
+  "successVolume": 1,
+  "errorVolume": 0.5
+}
+```
+
+This lowers all sounds globally while keeping the error sound quieter than success.
+
 ## Development
 
 ### Prerequisites
@@ -140,9 +149,10 @@ npm run validate
 
 ### Notes
 
-- The entrypoint is `extension-end-of-turn-sound.ts`
-- The bundled audio file is `job_is_done.mp3` in the extension root
-- The extension is ESM (`"type": "module"`), so it resolves bundled assets with `import.meta.url`
+- Entrypoint: `extension-end-of-turn-sound.ts`
+- ESM module (`"type": "module"`)
+- Bundled audio files live in the extension root
+- The TypeScript config only includes the entrypoint file, so validation stays fast
 
 ## Resources
 
